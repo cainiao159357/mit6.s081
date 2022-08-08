@@ -1,0 +1,5 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/os/xxv6/xv6-labs-2020'
+ 
+riscv64-unknown-elf-gcc    -c -o kernel/entry.o kernel/entry.S
+ 
