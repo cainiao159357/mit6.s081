@@ -150,6 +150,7 @@ freeproc(struct proc *p)
   p->killed = 0;
   p->xstate = 0;
   p->state = UNUSED;
+  p->trace_num=0;
 }
 
 // Create a user page table for a given process,
@@ -274,6 +275,7 @@ fork(void)
     return -1;
   }
   np->sz = p->sz;
+  np->trace_num=p->trace_num;
 
   np->parent = p;
 
@@ -692,4 +694,15 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+int get_proc_num(){
+  struct proc *p=myproc();
+  int num=0;
+  while(p->parent){
+    if(p->state!=UNUSED){
+      num++;
+    }
+    p=p->parent;
+  }
+  return num;
 }
