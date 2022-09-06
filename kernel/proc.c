@@ -230,6 +230,10 @@ userinit(void)
 
   p->state = RUNNABLE;
 
+  p->alarm_handler=0;
+  p->alarm_time=0;
+  p->alarm_total_time=0;
+
   release(&p->lock);
 }
 
