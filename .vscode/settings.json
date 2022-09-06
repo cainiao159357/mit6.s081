@@ -1,0 +1,17 @@
+{
+    "makefile.extensionOutputFolder": "./.vscode",
+    "files.associations": {
+        "stat.h": "c",
+        "user.h": "c",
+        "defs.h": "c",
+        "proc.h": "c",
+        "syscall.h": "c",
+        "param.h": "c",
+        "types.h": "c",
+        "memlayout.h": "c",
+        "riscv.h": "c",
+        "spinlock.h": "c",
+        "fs.h": "c",
+        "elf.h": "c"
+    }
+}

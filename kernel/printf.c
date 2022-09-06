@@ -132,3 +132,15 @@ printfinit(void)
   initlock(&pr.lock, "pr");
   pr.locking = 1;
 }
+
+void backtrace(void){
+  uint64 s0=r_fp();
+  uint64 kstack_base=PGROUNDDOWN(s0)+0x1000;
+  while(1){
+    printf("%p\n",*(uint64 *)(s0-0x8));
+    s0=*(uint64 *)(s0-0x10);
+    if(s0>=kstack_base){
+      break;
+    }
+  }
+}
