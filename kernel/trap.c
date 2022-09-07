@@ -81,11 +81,12 @@ usertrap(void)
     // printf("alarm_time:%d alarm_total_num:%d alarm_handler:%p\n",p->alarm_time,p->alarm_total_time,p->alarm_handler);
     if(p->alarm_total_time!=0){
       p->alarm_time+=1;
-      if(p->alarm_time>=p->alarm_total_time){
+      if((p->alarm_time>=p->alarm_total_time)&&(p->is_alarm==0)){
+        memmove(p->alarm_trapframe,p->trapframe,sizeof(struct trapframe));
         p->trapframe->epc=(uint64)p->alarm_handler;
         p->alarm_handler=0;
         p->alarm_time=0;
-        p->alarm_total_time=0;
+        p->is_alarm=1;
       }
     }
     yield();
