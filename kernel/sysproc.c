@@ -43,12 +43,20 @@ sys_sbrk(void)
 {
   int addr;
   int n;
+  int size;
 
   if(argint(0, &n) < 0)
     return -1;
   addr = myproc()->sz;
-  if(growproc(n) < 0)
+  size=myproc()->sz;
+  if(n>0){
+    myproc()->sz+=n;
+  }else if(size+n>0){
+    size=uvmdealloc(myproc()->pagetable,size,size+n);
+    myproc()->sz=size;
+  }else{
     return -1;
+  }
   return addr;
 }
 
