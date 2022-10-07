@@ -21,9 +21,11 @@ extern uint8 cow_num[];
 void
 kvminit()
 {
+  // printf("kvminit b\n");
   kernel_pagetable = (pagetable_t) kalloc();
+  // printf("kvminit e\n");
   memset(kernel_pagetable, 0, PGSIZE);
-
+  
   // uart registers
   kvmmap(UART0, UART0, PGSIZE, PTE_R | PTE_W);
 
@@ -45,6 +47,7 @@ kvminit()
   // map the trampoline for trap entry/exit to
   // the highest virtual address in the kernel.
   kvmmap(TRAMPOLINE, (uint64)trampoline, PGSIZE, PTE_R | PTE_X);
+  
 }
 
 // Switch h/w page table register to the kernel's page table,
@@ -359,10 +362,29 @@ int
 copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
 {
   uint64 n, va0, pa0;
-  printf("copyout b\n");
+  pte_t *pte;
+  uint flags;
+  char *mem=0;
+  // printf("copyout b\n");
   while(len > 0){
     va0 = PGROUNDDOWN(dstva);
     pa0 = walkaddr(pagetable, va0);
+    if(va0<MAXVA){
+      pte=walk(pagetable,va0,0);
+      if(pte ==0){
+        return -1;
+      }
+      flags=PTE_FLAGS(*pte);
+      if((flags&PTE_COW)!=0&&((mem=kalloc())!=0)){
+        uint64 pa=PTE2PA(*pte);
+        memmove(mem,(void *)pa,PGSIZE);
+        flags=(flags&(~PTE_COW))|PTE_W;
+        *pte=PA2PTE(mem)|flags;
+        kfree((void *)pa);
+        pa0=(uint64)mem;
+      }
+    }
+    
     if(pa0 == 0)
       return -1;
     n = PGSIZE - (dstva - va0);
@@ -374,7 +396,7 @@ copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
     src += n;
     dstva = va0 + PGSIZE;
   }
-  printf("copyout e\n");
+  // printf("copyout e\n");
   return 0;
 }
 

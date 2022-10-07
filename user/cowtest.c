@@ -138,6 +138,7 @@ filetest()
     }
     int pid = fork();
     if(pid < 0){
+      printf("ohhhhh\n");
       printf("fork failed\n");
       exit(-1);
     }

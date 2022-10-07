@@ -258,6 +258,7 @@ growproc(int n)
 int
 fork(void)
 {
+  // printf("fork b\n");
   int i, pid;
   struct proc *np;
   struct proc *p = myproc();
@@ -296,7 +297,7 @@ fork(void)
   np->state = RUNNABLE;
 
   release(&np->lock);
-
+  // printf("fork e\n");
   return pid;
 }
 
