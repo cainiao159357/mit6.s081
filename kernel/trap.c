@@ -11,6 +11,7 @@ uint ticks;
 
 extern char trampoline[], uservec[], userret[];
 
+extern uint8 cow_num[];
 // in kernelvec.S, calls kerneltrap().
 void kernelvec();
 
@@ -65,7 +66,33 @@ usertrap(void)
     intr_on();
 
     syscall();
-  } else if((which_dev = devintr()) != 0){
+  }else if(r_scause()==15){
+    printf("taps b\n");
+
+    uint64 write_addr=r_stval();
+    uint64 va=PGROUNDDOWN(write_addr);
+    pte_t *pte;
+    pte=walk(p->pagetable,va,0);
+
+    if((*pte & PTE_V) == 0)
+      panic("cow usertap pte fail");
+
+    uint flags=PTE_FLAGS(*pte);
+    char *mem=0;
+    if(((flags|PTE_COW)!=0)&&(write_addr<p->sz)&&((mem=kalloc())!=0)){
+      uint64 pa=PTE2PA(*pte);
+      memmove(mem,(void *)pa,PGSIZE);
+      flags=(flags&(~PTE_COW))|PTE_W;
+      if(mappages(p->pagetable, va, PGSIZE, (uint64)mem, flags) != 0){
+        panic("mappages fail");
+      }
+      cow_num[pa>>12]--;
+      kfree((void *)pa);
+    }else{
+      p->killed=1;
+    }
+    printf("traps e\n");
+  }else if((which_dev = devintr()) != 0){
     // ok
   } else {
     printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
